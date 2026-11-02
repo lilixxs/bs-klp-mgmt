@@ -2,6 +2,7 @@ node_modules/
 dist/
 *.vsix
 .vscode-test/
+.vscode/
 temp_images/
 
 # 本地调研原始证据包含真实工程与截图，不纳入版本控制。

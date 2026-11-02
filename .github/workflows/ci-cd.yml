@@ -40,7 +40,18 @@ jobs:
         run: npm run check
 
       - name: 测试
-        run: npm test
+        shell: pwsh
+        run: |
+          npm test *> test-output.log
+          $code = $LASTEXITCODE
+          if ($code -ne 0) {
+            # 把失败尾部写进 check run 注解，便于公开排查。
+            $tail = (Get-Content test-output.log -Tail 60) -join "`n"
+            $escaped = $tail.Replace('%', '%25').Replace("`r", '').Replace("`n", '%0A')
+            Write-Output "::error title=测试失败（尾部输出）::$escaped"
+            Get-Content test-output.log -Tail 120
+            exit $code
+          }
 
       - name: 构建
         run: npm run build

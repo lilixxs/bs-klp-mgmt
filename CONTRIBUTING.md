@@ -56,15 +56,29 @@ npm run build
 
 发布使用 VS Code Marketplace 的 Trusted Publishing（OIDC），不需要保存 PAT。
 
-1. 更新 `package.json` 的 `version`。
-2. 提交后打标签：`git tag v0.1.0 && git push origin v0.1.0`。
-3. `.github/workflows/publish.yml` 会执行类型检查与构建，并用 `npx @vscode/vsce publish --oidc` 发布。
+### 自动发布（默认）
+
+推送到 `main` 会触发 `.github/workflows/ci-cd.yml`：
+
+1. `npm run check`、`npm test`、`npm run build`；
+2. 全部通过后自动提升补丁版本；
+3. `npx @vscode/vsce publish --oidc` 发布；
+4. 提交版本号并推送 `v<版本>` 标签。
+
+提交信息包含 `[skip release]` 时只做验证，不升版本、不发布。纯文档改动（`**.md`、`docs/**`）不会触发该工作流。
+
+### 按标签发布（手动）
+
+`.github/workflows/publish.yml` 在推送 `v*` 标签或手动运行时发布，要求标签与 `package.json` 版本一致。注意：工作流用 `GITHUB_TOKEN` 推送的标签不会再次触发该工作流，因此自动流程在 `ci-cd.yml` 内直接发布。
+
+发布失败的排查顺序：Actions 日志 → 发布者 ID 是否等于 `package.json` 的 `publisher` → 版本是否已被占用。
 
 Marketplace 侧需要在发布者的 **Trusted Publishing** 中创建策略：
 
 - Repository owner：`lilixxs`
 - Repository：`bs-klp-mgmt`
-- Workflow：`publish.yml`
+- Workflow：`publish.yml` 与 `ci-cd.yml` 各需一条策略
 - Environment：留空（工作流未使用环境）
 
 同一版本号不能重复发布；发布失败修正后需提升版本或使用新标签。
+

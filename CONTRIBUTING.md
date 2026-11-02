@@ -77,7 +77,7 @@ Marketplace 侧需要在发布者的 **Trusted Publishing** 中创建策略：
 
 - Repository owner：`lilixxs`
 - Repository：`bs-klp-mgmt`
-- Workflow：`publish.yml` 与 `ci-cd.yml` 各需一条策略
+- Workflow：`publish.yml`（只有这一个工作流）
 - Environment：留空（工作流未使用环境）
 
 同一版本号不能重复发布；发布失败修正后需提升版本或使用新标签。

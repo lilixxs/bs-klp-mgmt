@@ -45,11 +45,13 @@ jobs:
           npm test *> test-output.log
           $code = $LASTEXITCODE
           if ($code -ne 0) {
-            # 把失败尾部写进 check run 注解，便于公开排查。
-            $tail = (Get-Content test-output.log -Tail 60) -join "`n"
-            $escaped = $tail.Replace('%', '%25').Replace("`r", '').Replace("`n", '%0A')
-            Write-Output "::error title=测试失败（尾部输出）::$escaped"
-            Get-Content test-output.log -Tail 120
+            # 只提取失败用例及其后 18 行，写进 check run 注解，便于公开排查。
+            $ctx = Select-String -Path test-output.log -Pattern 'not ok' -Context 0, 18 | Select-Object -First 3
+            $text = ($ctx | ForEach-Object { $_.Line + "`n" + ($_.Context.PostContext -join "`n") }) -join "`n----`n"
+            if ([string]::IsNullOrWhiteSpace($text)) { $text = (Get-Content test-output.log -Tail 40) -join "`n" }
+            $escaped = $text.Replace('%', '%25').Replace("`r", '').Replace("`n", '%0A')
+            Write-Output "::error title=测试失败用例::$escaped"
+            Get-Content test-output.log -Tail 40
             exit $code
           }
 

@@ -231,10 +231,17 @@ describe('Jet 数据库桥（合成数据）', () => {
     assert.equal(createHash('sha256').update(fileBefore).digest('hex'), createHash('sha256').update(fileAfter).digest('hex'));
   });
 
-  test('每次调用使用临时工作组副本（不依赖用户 System.mdw 的锁状态）', async () => {
+  test('存在 System.mdw 时使用临时副本，不存在时直接打开', async (t) => {
     const probe = await bridge.probe(dbPath);
-    assert.ok(probe.systemDb, '应报告实际使用的工作组文件');
+    if (!probe.systemDb) {
+      // 干净 Windows（无 Office/ACE）没有可复制的 System.mdw；Jet 直接打开数据库。
+      // 其余用例已覆盖该路径下的读写，这里不把“必定有工作组”当作普遍前提。
+      t.diagnostic('本机没有 System.mdw，跳过临时副本断言');
+      return;
+    }
+    const resolved = path.resolve(probe.systemDb);
     const tempRoot = path.resolve(process.env['TEMP'] ?? process.env['TMP'] ?? '/tmp');
-    assert.equal(path.resolve(probe.systemDb ?? '').startsWith(tempRoot), true, '工作组应位于临时目录');
+    assert.equal(resolved.startsWith(tempRoot), true, '工作组应位于临时目录');
+    assert.equal(path.basename(resolved).toLowerCase(), 'klp-system.mdw', '应使用复制的临时工作组，而不是用户共享文件');
   });
 });

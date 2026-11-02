@@ -1,11 +1,16 @@
 .vscode/**
+.github/**
 src/**
 webview/**
 test/**
 docs/**
+scripts/**
 node_modules/**
+.gitignore
+PROGRESS.md
 esbuild.mjs
 vite.config.mts
 tsconfig*.json
 AGENTS.md
+CONTRIBUTING.md
 **/*.map

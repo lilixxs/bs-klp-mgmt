@@ -58,7 +58,7 @@ npm run build
 
 ### 自动发布（默认）
 
-推送到 `main` 会触发 `.github/workflows/ci-cd.yml`：
+推送到 `main` 会触发 `.github/workflows/publish.yml`：
 
 1. `npm run check`、`npm test`、`npm run build`；
 2. 全部通过后自动提升补丁版本；
@@ -69,7 +69,7 @@ npm run build
 
 ### 按标签发布（手动）
 
-`.github/workflows/publish.yml` 在推送 `v*` 标签或手动运行时发布，要求标签与 `package.json` 版本一致。注意：工作流用 `GITHUB_TOKEN` 推送的标签不会再次触发该工作流，因此自动流程在 `ci-cd.yml` 内直接发布。
+同一个工作流在推送 `v*` 标签时执行，要求标签与 `package.json` 版本一致，只发布该版本，不升版本。注意：工作流用 `GITHUB_TOKEN` 推送的标签不会再次触发自身，因此自动流程在同一次运行内直接发布。
 
 发布失败的排查顺序：Actions 日志 → 发布者 ID 是否等于 `package.json` 的 `publisher` → 版本是否已被占用。
 

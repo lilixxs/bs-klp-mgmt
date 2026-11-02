@@ -2,13 +2,16 @@ name: Publish Extension
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches: [main]
+    tags: ['v*']
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
   workflow_dispatch:
 
-# Trusted Publishing 需要 OIDC：id-token: write 由 Marketplace 换取短期凭据。
+# contents: write 用于提交版本号并推送标签；id-token: write 用于 Trusted Publishing。
 permissions:
-  contents: read
+  contents: write
   id-token: write
 
 concurrency:
@@ -17,10 +20,12 @@ concurrency:
 
 jobs:
   publish:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: 安装 Node.js
         uses: actions/setup-node@v4
@@ -34,20 +39,65 @@ jobs:
       - name: 类型检查
         run: npm run check
 
+      - name: 测试
+        shell: pwsh
+        run: |
+          npm test *> test-output.log
+          $code = $LASTEXITCODE
+          if ($code -ne 0) {
+            # 只提取失败用例及其后 18 行，写进 check run 注解，便于公开排查。
+            $ctx = Select-String -Path test-output.log -Pattern 'not ok' -Context 0, 18 | Select-Object -First 3
+            $text = ($ctx | ForEach-Object { $_.Line + "`n" + ($_.Context.PostContext -join "`n") }) -join "`n----`n"
+            if ([string]::IsNullOrWhiteSpace($text)) { $text = (Get-Content test-output.log -Tail 40) -join "`n" }
+            $escaped = $text.Replace('%', '%25').Replace("`r", '').Replace("`n", '%0A')
+            Write-Output "::error title=测试失败用例::$escaped"
+            Get-Content test-output.log -Tail 40
+            exit $code
+          }
+
       - name: 构建
         run: npm run build
 
-      # 标签必须与 package.json 版本一致，避免发布与标签不符的包。
+      # 标签触发：只发布该标签对应的版本，必须与 package.json 一致。
       - name: 校验标签与版本一致
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: github.ref_type == 'tag'
+        shell: pwsh
         run: |
-          PKG_VERSION="$(node -p "require('./package.json').version")"
-          TAG_VERSION="${GITHUB_REF_NAME#v}"
-          if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
-            echo "::error::标签 v${TAG_VERSION} 与 package.json 的 ${PKG_VERSION} 不一致"
+          $version = node -p "require('./package.json').version"
+          $tag = "${{ github.ref_name }}".TrimStart('v')
+          if ($version -ne $tag) {
+            Write-Output "::error::标签 v$tag 与 package.json 的 $version 不一致"
             exit 1
-          fi
+          }
 
-      # 测试需要 32 位 Jet/ADO 与 Windows PowerShell，不在 ubuntu 发布任务中执行。
+      # main 推送：提交信息含 [skip release] 时只验证，不升版本、不发布。
+      - name: 提升补丁版本
+        if: github.ref_type == 'branch' && !contains(github.event.head_commit.message, '[skip release]')
+        run: npm version patch --no-git-tag-version
+
       - name: 发布到 VS Code Marketplace
-        run: npx --yes @vscode/vsce publish --oidc
+        if: github.ref_type == 'tag' || !contains(github.event.head_commit.message, '[skip release]')
+        shell: pwsh
+        run: |
+          npx --yes @vscode/vsce publish --oidc *> publish-output.log
+          $code = $LASTEXITCODE
+          if ($code -ne 0) {
+            $text = (Get-Content publish-output.log -Tail 40) -join "`n"
+            $escaped = $text.Replace('%', '%25').Replace("`r", '').Replace("`n", '%0A')
+            Write-Output "::error title=发布失败::$escaped"
+            Get-Content publish-output.log -Tail 60
+            exit $code
+          }
+
+      # 先发布再提交：发布失败不会留下指向未发布版本的孤儿标签。
+      - name: 提交版本并推送标签
+        if: github.ref_type == 'branch' && !contains(github.event.head_commit.message, '[skip release]')
+        shell: pwsh
+        run: |
+          $version = node -p "require('./package.json').version"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json
+          git commit -m "chore(release): v$version [skip release]"
+          git tag "v$version"
+          git push origin HEAD:main "v$version"

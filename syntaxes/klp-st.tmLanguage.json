@@ -1,0 +1,129 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "KLP ST",
+  "scopeName": "source.klp-st",
+  "fileTypes": ["stf"],
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#program" },
+    { "include": "#keywords" },
+    { "include": "#types" },
+    { "include": "#time-literals" },
+    { "include": "#numbers" },
+    { "include": "#strings" },
+    { "include": "#calls" },
+    { "include": "#member-access" },
+    { "include": "#identifiers" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.block.klp-st",
+          "begin": "\\(\\*",
+          "end": "\\*\\)"
+        },
+        {
+          "name": "comment.line.double-slash.klp-st",
+          "match": "//.*$"
+        }
+      ]
+    },
+    "program": {
+      "patterns": [
+        {
+          "name": "keyword.control.program.klp-st",
+          "match": "(?i)^\\s*(PROGRAM|END_PROGRAM)\\b"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.klp-st",
+          "match": "(?i)\\b(IF|THEN|ELSIF|ELSE|END_IF|CASE|OF|END_CASE|FOR|TO|BY|DO|END_FOR|WHILE|END_WHILE|REPEAT|UNTIL|END_REPEAT|RETURN|EXIT|CONTINUE)\\b"
+        },
+        {
+          "name": "keyword.operator.word.klp-st",
+          "match": "(?i)\\b(AND|OR|XOR|NOT|MOD)\\b"
+        },
+        {
+          "name": "constant.language.boolean.klp-st",
+          "match": "(?i)\\b(TRUE|FALSE)\\b"
+        },
+        {
+          "name": "keyword.other.declaration.klp-st",
+          "match": "(?i)\\b(VAR|VAR_INPUT|VAR_OUTPUT|VAR_IN_OUT|VAR_GLOBAL|VAR_TEMP|END_VAR|FUNCTION_BLOCK|END_FUNCTION_BLOCK|FUNCTION|END_FUNCTION|TYPE|END_TYPE|STRUCT|END_STRUCT|RETAIN|CONSTANT)\\b"
+        }
+      ]
+    },
+    "types": {
+      "patterns": [
+        {
+          "name": "support.type.klp-st",
+          "match": "(?i)\\b(BOOL|SINT|INT|DINT|LINT|USINT|UINT|UDINT|ULINT|REAL|LREAL|TIME|DATE|STRING|BYTE|WORD|DWORD|LWORD)\\b"
+        }
+      ]
+    },
+    "time-literals": {
+      "patterns": [
+        {
+          "name": "constant.numeric.time.klp-st",
+          "match": "(?i)\\b(T|TIME)#[0-9]+(\\.[0-9]+)?(ms|s|m|h|d|us|ns)\\b"
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.hex.klp-st",
+          "match": "\\b(16#[0-9A-Fa-f_]+|0x[0-9A-Fa-f]+)\\b"
+        },
+        {
+          "name": "constant.numeric.float.klp-st",
+          "match": "\\b\\d[\\d_]*\\.\\d[\\d_]*([eE][+-]?\\d+)?\\b"
+        },
+        {
+          "name": "constant.numeric.integer.klp-st",
+          "match": "\\b\\d[\\d_]*\\b"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.single.klp-st",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            { "name": "constant.character.escape.klp-st", "match": "''" }
+          ]
+        }
+      ]
+    },
+    "calls": {
+      "patterns": [
+        {
+          "name": "entity.name.function.call.klp-st",
+          "match": "\\b[A-Za-z_][A-Za-z0-9_]*(?=\\s*\\()"
+        }
+      ]
+    },
+    "member-access": {
+      "patterns": [
+        {
+          "name": "variable.other.property.klp-st",
+          "match": "(?<=\\.)[A-Za-z_][A-Za-z0-9_]*"
+        }
+      ]
+    },
+    "identifiers": {
+      "patterns": [
+        {
+          "name": "variable.other.klp-st",
+          "match": "\\b[A-Za-z_][A-Za-z0-9_]*\\b"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,152 @@
+{
+  "name": "bs-klp-mgmt",
+  "displayName": "KLP 项目管理",
+  "description": "浏览与编辑 KLP 工控软件的项目文件夹：变量、ST 程序、通讯配置与工程改名",
+  "version": "0.1.0",
+  "private": true,
+  "publisher": "local",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [],
+  "contributes": {
+    "commands": [
+      {
+        "command": "klp.openProject",
+        "title": "KLP: 打开项目"
+      },
+      {
+        "command": "klp.openProjectFolder",
+        "title": "KLP: 打开工程文件夹"
+      },
+      {
+        "command": "klp.openWorkspaceProject",
+        "title": "KLP: 打开当前工作区工程"
+      },
+      {
+        "command": "klp.refreshProject",
+        "title": "KLP: 刷新项目树"
+      },
+      {
+        "command": "klp.reloadProject",
+        "title": "KLP: 重新读取工程"
+      },
+      {
+        "command": "klp.save",
+        "title": "KLP: 保存修改"
+      },
+      {
+        "command": "klp.discardDraft",
+        "title": "KLP: 放弃未保存修改"
+      },
+      {
+        "command": "klp.renameProject",
+        "title": "KLP: 工程改名"
+      },
+      {
+        "command": "klp.openEditor",
+        "title": "KLP: 打开编辑器"
+      },
+      {
+        "command": "klp.openFile",
+        "title": "KLP: 打开文件"
+      },
+      {
+        "command": "klp.openProgram",
+        "title": "KLP: 打开程序源文件"
+      }
+    ],
+    "languages": [
+      {
+        "id": "klp-st",
+        "aliases": [
+          "KLP ST",
+          "ST"
+        ],
+        "extensions": [
+          ".stf"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "klp-st",
+        "scopeName": "source.klp-st",
+        "path": "./syntaxes/klp-st.tmLanguage.json"
+      }
+    ],
+    "configurationDefaults": {
+      "[klp-st]": {
+        "files.encoding": "gbk",
+        "files.eol": "\r\n",
+        "editor.tabSize": 4,
+        "editor.insertSpaces": false,
+        "editor.wordBasedSuggestions": "off"
+      }
+    },
+    "views": {
+      "explorer": [
+        {
+          "id": "klp.projectTree",
+          "name": "KLP 项目"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "klp.openProjectFolder",
+          "when": "view == klp.projectTree",
+          "group": "navigation@1"
+        },
+        {
+          "command": "klp.refreshProject",
+          "when": "view == klp.projectTree",
+          "group": "navigation@2"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "klp.openEditor",
+          "when": "klp.hasProject"
+        },
+        {
+          "command": "klp.openFile",
+          "when": "false"
+        },
+        {
+          "command": "klp.openProgram",
+          "when": "klp.hasProject"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "build": "npm run build:ext && npm run build:webview",
+    "build:ext": "node esbuild.mjs",
+    "build:webview": "vite build",
+    "watch:ext": "node esbuild.mjs --watch",
+    "watch:webview": "vite build --watch",
+    "check": "tsc -p tsconfig.json && vue-tsc -p tsconfig.webview.json",
+    "test": "node --experimental-strip-types --test test/*.test.ts",
+    "package": "node scripts/package-vsix.mjs"
+  },
+  "dependencies": {
+    "fast-xml-parser": "^4.5.0",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/vscode": "^1.85.0",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "esbuild": "^0.24.2",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.7",
+    "vue-tsc": "^2.2.0"
+  }
+}

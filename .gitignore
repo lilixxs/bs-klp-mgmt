@@ -1,0 +1,11 @@
+node_modules/
+dist/
+*.vsix
+.vscode-test/
+temp_images/
+
+# 本地调研原始证据包含真实工程与截图，不纳入版本控制。
+/docs/klp-research-2026-11-01-local/
+
+# 本地进度与验收记录含本机路径和真实工程名，不纳入公开仓库。
+/PROGRESS.md

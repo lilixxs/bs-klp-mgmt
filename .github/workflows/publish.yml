@@ -1,0 +1,53 @@
+name: Publish Extension
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+# Trusted Publishing 需要 OIDC：id-token: write 由 Marketplace 换取短期凭据。
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 类型检查
+        run: npm run check
+
+      - name: 构建
+        run: npm run build
+
+      # 标签必须与 package.json 版本一致，避免发布与标签不符的包。
+      - name: 校验标签与版本一致
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          PKG_VERSION="$(node -p "require('./package.json').version")"
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          if [ "$PKG_VERSION" != "$TAG_VERSION" ]; then
+            echo "::error::标签 v${TAG_VERSION} 与 package.json 的 ${PKG_VERSION} 不一致"
+            exit 1
+          fi
+
+      # 测试需要 32 位 Jet/ADO 与 Windows PowerShell，不在 ubuntu 发布任务中执行。
+      - name: 发布到 VS Code Marketplace
+        run: npx --yes @vscode/vsce publish --oidc

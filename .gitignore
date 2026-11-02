@@ -9,3 +9,16 @@ temp_images/
 
 # 本地进度与验收记录含本机路径和真实工程名，不纳入公开仓库。
 /PROGRESS.md
+
+# AI 助手相关文件：本地保留，不进入公开仓库。
+AGENTS.md
+CLAUDE.md
+.cursor/
+.cursorrules
+.claude/
+.github/copilot-instructions.md
+.opencode/
+opencode.json
+opencode.jsonc
+*.prompt.md
+.specstory/

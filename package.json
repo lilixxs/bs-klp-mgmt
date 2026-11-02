@@ -4,7 +4,12 @@
   "description": "浏览与编辑 KLP 工控软件的项目文件夹：变量、ST 程序、通讯配置与工程改名",
   "version": "0.1.0",
   "private": true,
-  "publisher": "local",
+  "publisher": "lilixxs",
+  "icon": "media/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lilixxs/bs-klp-mgmt.git"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },

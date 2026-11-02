@@ -2,7 +2,7 @@
   "name": "bs-klp-mgmt",
   "displayName": "KLP 项目管理",
   "description": "浏览与编辑 KLP 工控软件的项目文件夹：变量、ST 程序、通讯配置与工程改名",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "publisher": "lilixxs",
   "icon": "media/icon.png",
